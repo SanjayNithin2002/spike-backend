@@ -1,12 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt'); // Ensure bcrypt is required
+const bcrypt = require('bcrypt'); 
 const Users = require('../models/Users');
 const router = express.Router();
+const checkAuth = require('../middlewares/checkAuth');
 const generateToken = require('../middlewares/generateToken');
 
 // Get All Users
-router.get('/', async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
     try {
         const users = await Users.find().exec();
         console.log('Get All Users.', users);
@@ -18,7 +19,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get User by Id
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkAuth, async (req, res) => {
     const { id } = req.params;
     try {
         const user = await Users.findById(id).exec();
@@ -26,7 +27,7 @@ router.get('/:id', async (req, res) => {
             console.log('Get User by Id.', user);
             res.status(200).json({ user });
         } else {
-            res.status(404).json({ message: "User not found" });
+            res.status(404).json({ message: "User Not Found" });
         }
     } catch (err) {
         console.error(err);
@@ -80,7 +81,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // Update User
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', checkAuth, async (req, res) => {
     const { id } = req.params;
     const updateOps = req.body.reduce((acc, ops) => ({ ...acc, [ops.propName]: ops.value }), {});
     try {
@@ -89,7 +90,7 @@ router.patch('/:id', async (req, res) => {
             console.log('User Edited.', user);
             res.status(200).json({ message: "User Edited" });
         } else {
-            res.status(404).json({ message: "No such record found" });
+            res.status(404).json({ message: "User Not Found" });
         }
     } catch (err) {
         console.error(err);
@@ -98,7 +99,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // Delete User
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', checkAuth, async (req, res) => {
     const { id } = req.params;
     try {
         const user = await Users.findByIdAndDelete(id).exec();
@@ -106,7 +107,7 @@ router.delete('/:id', async (req, res) => {
             console.log('User Deleted.', user);
             res.status(200).json({ message: "User Deleted" });
         } else {
-            res.status(404).json({ message: "No such record found" });
+            res.status(404).json({ message: "User Not Found" });
         }
     } catch (err) {
         console.error(err);

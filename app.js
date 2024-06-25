@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const handleCORS = require('./api/middlewares/handleCORS')
 const userRoutes = require('./api/routes/Users');
+const spikeRoutes = require('./api/routes/Spikes');
 
 // Middlewares
 mongoose.connect(process.env.MONGO_URL)
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
     });
 });
 app.use('/users', userRoutes);
+app.use('/spikes', spikeRoutes);
 
 // Error Handlers
 app.use((req, res, next) => {
