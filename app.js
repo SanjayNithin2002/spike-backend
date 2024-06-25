@@ -9,7 +9,9 @@ const userRoutes = require('./api/routes/Users');
 const spikeRoutes = require('./api/routes/Spikes');
 
 // Middlewares
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URL, {
+    dbName: 'spikes'
+});
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
