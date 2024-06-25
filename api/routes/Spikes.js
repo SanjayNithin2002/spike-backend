@@ -32,7 +32,8 @@ router.get('/:id', checkAuth, async (req, res) => {
 router.post('/', checkAuth, async (req, res) => {
     try {
         const newSpike = new Spikes({
-            _id: new mongoose.Types.ObjectId(), 
+            _id: new mongoose.Types.ObjectId(),
+            userId: req.body.userId, 
             metric: req.body.metric, 
             punishment: req.body.punishment
         });
