@@ -1,11 +1,14 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const app = express();
 const port = process.env.PORT || 3000;
 const handleCORS = require('./api/middlewares/handleCORS')
+const userRoutes = require('./api/routes/Users');
 
 // Middlewares
+mongoose.connect(process.env.MONGO_URL)
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -19,7 +22,9 @@ app.get('/', (req, res) => {
         message: 'Welcome to Spike Backend'
     });
 });
+app.use('/users', userRoutes);
 
+// Error Handlers
 app.use((req, res, next) => {
     const error = new Error('Not Found');
     error.status = 404;
