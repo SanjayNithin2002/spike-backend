@@ -2,14 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo');
-const session = require('express-session');
-const passport = require('passport');
-const GitHubStrategy = require('passport-github2').Strategy;
 const app = express();
 const port = process.env.PORT || 3000;
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const handleCORS = require('./api/middlewares/handleCORS');
 const userRoutes = require('./api/routes/Users');
 const spikeRoutes = require('./api/routes/Spikes');
@@ -20,52 +14,12 @@ mongoose.connect(process.env.MONGO_URL, { dbName: 'spikes' })
     .then(() => console.log('Connected to database.'))
     .catch(err => console.log('Error connecting to database.'));
 
-passport.use(new GitHubStrategy({
-    clientID: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/integrations/github/callback',
-    scope: ['repo']
-},
-    (accessToken, refreshToken, profile, done) => {
-        return done(null, { profile, accessToken });
-    }
-));
-
-passport.serializeUser((user, done) => {
-    done(null, user);
-});
-
-passport.deserializeUser((user, done) => {
-    done(null, user);
-});
-
-app.use(session({
-    secret: process.env.SESSION_KEY,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGO_URL,
-        collectionName: 'sessions',
-        dbName: 'spikes'
-    })
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(handleCORS);
-
-// Authenticate Routes
-app.get('/integrations/github/callback',
-    passport.authenticate('github', { failureRedirect: '/login' }),
-    (req, res) => {
-        res.redirect('/integrations/github/user');
-    }
-);
 
 // Routes
 app.use('/users', userRoutes);
