@@ -7,7 +7,7 @@ const port = process.env.PORT || 3000;
 const handleCORS = require('./api/middlewares/handleCORS');
 const userRoutes = require('./api/routes/Users');
 const spikeRoutes = require('./api/routes/Spikes');
-const integrationGithubAuthRoutes = require('./api/integrations/Github/Auth');
+const integrationGithubAuthRoutes = require('./api/integrations/Github');
 
 // Middleware
 mongoose.connect(process.env.MONGO_URL, { dbName: 'spikes' })
