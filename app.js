@@ -2,33 +2,34 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 const session = require('express-session');
 const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
-
 const app = express();
 const port = process.env.PORT || 3000;
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
-const handleCORS = require('./api/middlewares/handleCORS')
+const handleCORS = require('./api/middlewares/handleCORS');
 const userRoutes = require('./api/routes/Users');
 const spikeRoutes = require('./api/routes/Spikes');
-const githubAuthRoutes = require('./api/integrations/Github/Auth');
-const githubHookRoutes = require('./api/integrations/Github/Webhook');
+const integrationGithubAuthRoutes = require('./api/integrations/Github/Auth');
 
-// Middlewares
+// Middleware
 mongoose.connect(process.env.MONGO_URL, { dbName: 'spikes' })
     .then(() => console.log('Connected to database.'))
     .catch(err => console.log('Error connecting to database.'));
-    
+
 passport.use(new GitHubStrategy({
     clientID: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: `${process.env.BASE_URL}/integrations/github/auth/callback`
+    callbackURL: 'http://localhost:3000/integrations/github/callback',
+    scope: ['repo']
 },
     (accessToken, refreshToken, profile, done) => {
         return done(null, { profile, accessToken });
-    }));
+    }
+));
 
 passport.serializeUser((user, done) => {
     done(null, user);
@@ -38,7 +39,17 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-app.use(session({ secret: process.env.SESSION_KEY, resave: false, saveUninitialized: false }));
+app.use(session({
+    secret: process.env.SESSION_KEY,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URL,
+        collectionName: 'sessions',
+        dbName: 'spikes'
+    })
+}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan('dev'));
@@ -48,16 +59,18 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(handleCORS);
 
+// Authenticate Routes
+app.get('/integrations/github/callback',
+    passport.authenticate('github', { failureRedirect: '/login' }),
+    (req, res) => {
+        res.redirect('/integrations/github/user');
+    }
+);
+
 // Routes
-app.get('/', (req, res) => {
-    res.status(200).json({
-        message: 'Welcome to Spike Backend'
-    });
-});
 app.use('/users', userRoutes);
 app.use('/spikes', spikeRoutes);
-app.use('/integrations/github/auth', githubAuthRoutes);
-app.use('/integrations/github/webhook', githubHookRoutes);
+app.use('/integrations/github', integrationGithubAuthRoutes);
 
 // Error Handlers
 app.use((req, res, next) => {
