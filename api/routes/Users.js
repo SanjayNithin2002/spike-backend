@@ -27,7 +27,7 @@ router.get('/:id', checkAuth, async (req, res) => {
             console.log('Get User by Id.', user);
             res.status(200).json({ user });
         } else {
-            res.status(404).json({ message: "User Not Found" });
+            res.status(404).json({ error: "User Not Found" });
         }
     } catch (err) {
         console.error(err);
@@ -41,14 +41,14 @@ router.post('/login', async (req, res) => {
         const { email, password } = req.body;
         const user = await Users.findOne({ email }).exec();
         if (!user) {
-            return res.status(401).json({ message: "Auth Failed" });
+            return res.status(401).json({ error: "Auth Failed" });
         }
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             const token = generateToken({ email: user.email, userId: user._id });
             return res.status(200).json({ message: "Auth Successful", token });
         } else {
-            return res.status(401).json({ message: "Auth Failed" });
+            return res.status(401).json({ error: "Auth Failed" });
         }
     } catch (err) {
         console.error(err);
@@ -62,7 +62,7 @@ router.post('/signup', async (req, res) => {
         const { name, email, password } = req.body;
         const existingUser = await Users.findOne({ email }).exec();
         if (existingUser) {
-            return res.status(422).json({ message: "Email exists" });
+            return res.status(422).json({ error: "Email exists" });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new Users({
@@ -90,7 +90,7 @@ router.patch('/:id', checkAuth, async (req, res) => {
             console.log('User Edited.', user);
             res.status(200).json({ message: "User Edited" });
         } else {
-            res.status(404).json({ message: "User Not Found" });
+            res.status(404).json({ error: "User Not Found" });
         }
     } catch (err) {
         console.error(err);
@@ -107,7 +107,7 @@ router.delete('/:id', checkAuth, async (req, res) => {
             console.log('User Deleted.', user);
             res.status(200).json({ message: "User Deleted" });
         } else {
-            res.status(404).json({ message: "User Not Found" });
+            res.status(404).json({ error: "User Not Found" });
         }
     } catch (err) {
         console.error(err);

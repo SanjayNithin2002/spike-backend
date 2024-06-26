@@ -33,8 +33,8 @@ router.post('/', checkAuth, async (req, res) => {
     try {
         const newSpike = new Spikes({
             _id: new mongoose.Types.ObjectId(),
-            userId: req.body.userId, 
-            metric: req.body.metric, 
+            userId: req.body.userId,
+            metric: req.body.metric,
             punishment: req.body.punishment
         });
         const spike = await newSpike.save();
@@ -42,7 +42,7 @@ router.post('/', checkAuth, async (req, res) => {
         res.status(201).json({ message: "Spike created", spike });
     } catch (err) {
         console.error(err);
-
+        res.status(500).json({ error: err.message });
     }
 });
 
