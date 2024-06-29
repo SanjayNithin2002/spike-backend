@@ -19,9 +19,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-app.use(handleCORS);
+app.use(handleCORS());
 
 // Routes
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'welcome to spike' });
+});
 app.use('/users', userRoutes);
 app.use('/spikes', spikeRoutes);
 app.use('/integrations/github', integrationGithubAuthRoutes);
