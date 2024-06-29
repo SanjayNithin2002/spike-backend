@@ -108,7 +108,7 @@ router.get('/callback', passport.authenticate('github', { failureRedirect: '/int
                 maxAge: 365 * 24 * 60 * 60 * 1000
             });
         console.log('Redirecting to client');
-        res.redirect(`https://spike-frontend-pi.vercel.app/`);
+        res.redirect(`https://spike-frontend-pi.vercel.app/selectrepos`);
     }
 );
 
