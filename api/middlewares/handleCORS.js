@@ -1,5 +1,5 @@
 const handleCORS = (req, res, next) => {
-    const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://spike-frontend-pi.vercel.app/', 'postman://app' ];
+    const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://spike-frontend-pi.vercel.app', 'postman://app' ];
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin) || origin === undefined) {
         res.header("Access-Control-Allow-Origin", origin || "*");
