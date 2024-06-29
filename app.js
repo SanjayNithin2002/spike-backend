@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 const userRoutes = require('./api/routes/Users');
@@ -14,6 +15,7 @@ mongoose.connect(process.env.MONGO_URL, { dbName: 'spikes' })
     .catch(err => console.log('Error connecting to database.'));
 
 app.use(morgan('dev'));
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
@@ -23,17 +25,9 @@ app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin) || origin === undefined) {
         res.header("Access-Control-Allow-Origin", origin || "*");
-        res.header(
-            "Access-Control-Allow-Headers",
-            "Origin, X-Requested-With, Accept, Authorization, Content-Type"
-        );
-        if (req.method === 'OPTIONS') {
-            res.header(
-                "Access-Control-Allow-Methods",
-                "PUT, POST, PATCH, DELETE, GET"
-            );
-            return res.status(200).json({});
-        }
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Accept, Authorization, Content-Type");
+        res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
         next();
     } else {
         return res.status(403).json({ message: "Forbidden" });

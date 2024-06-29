@@ -1,8 +1,6 @@
 const express = require('express');
-const session = require('express-session');
 const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
-const MongoStore = require('connect-mongo');
 const router = express.Router();
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
@@ -22,12 +20,12 @@ const getAllRepos = async (accessToken) => {
         return response.data.map(repo => {
             return {
                 id: repo.id,
-                name: repo.name, 
-                full_name: repo.full_name, 
-                html_url: repo.html_url, 
+                name: repo.name,
+                full_name: repo.full_name,
+                html_url: repo.html_url,
                 api_url: repo.url,
                 visibility: repo.visibility,
-                pushed_at: repo.pushed_at 
+                pushed_at: repo.pushed_at
             }
         });
     } catch (error) {
@@ -54,46 +52,47 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-router.use(session({
-    secret: process.env.SESSION_KEY,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGO_URL,
-        collectionName: 'sessions',
-        dbName: 'spikes'
-    })
-}));
-
-router.use(passport.initialize());
-router.use(passport.session());
-
-router.get('/callback',
-    passport.authenticate('github', { failureRedirect: '/integrations/github/login' }),
+router.get('/callback', passport.authenticate('github', { failureRedirect: '/integrations/github/login' }),
     (req, res) => {
-        res.redirect('http://localhost:3001/repos');
+        const { accessToken, profile } = req.user;
+        res.cookie('accessToken', accessToken,
+            {
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: 'none',
+                secure: false
+            });
+        res.cookie('username', profile.username,
+            {
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: 'none',
+                secure: false
+            });
+        res.redirect(`http://localhost:3001/selectrepos`);
     }
 );
 
 router.get('/logout', (req, res) => {
-    req.logout((err) => {
-        if (err) { return next(err); }
-        res.redirect('/');
-    });
+    res.clearCookie('accessToken');
+    res.clearCookie('username');
+    res.redirect('/');
 });
 
 router.get('/user', (req, res) => {
-    if (req.isAuthenticated()) {
-        res.json(req.user);
+    const { accessToken, profile } = req.cookies;
+    if (accessToken && profile) {
+        res.json({ username: profile.username });
     } else {
         res.status(401).json({ message: 'Not authenticated' });
     }
 });
 
+
 router.get('/user/repos', async (req, res) => {
-    console.log(req.user.accessToken);
+    const { accessToken, profile } = req.cookies;
     try {
-        const repos = await getAllRepos(req.user.accessToken);
+        const repos = await getAllRepos(accessToken);
         res.status(200).json({
             repos: repos
         });
@@ -103,7 +102,6 @@ router.get('/user/repos', async (req, res) => {
         });
     }
 });
-
 
 router.post('/webhook', (req, res) => {
     const payload = req.body;

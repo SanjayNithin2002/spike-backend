@@ -38,7 +38,6 @@ router.get('/:id', checkAuth, async (req, res) => {
 // User Login
 router.post('/login', async (req, res) => {
     try {
-        console.log(req.body);
         const { email, password } = req.body;
         const user = await Users.findOne({ email }).exec();
         if (!user) {
