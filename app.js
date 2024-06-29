@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const app = express();
 const port = process.env.PORT || 3000;
-const handleCORS = require('./api/middlewares/handleCORS');
 const userRoutes = require('./api/routes/Users');
 const spikeRoutes = require('./api/routes/Spikes');
 const integrationGithubAuthRoutes = require('./api/integrations/Github');
