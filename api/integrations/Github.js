@@ -13,32 +13,32 @@ const createWebhooks = async ({ accessToken, repos }) => {
         auth: accessToken
     });
     const results = await Promise.all(
-        repos.map(async ({owner, repo}) => {
-        console.log(`Creating /${owner}/${repo} webhook`);
-        const response = await octokit.request(`POST /repos/${owner}/${repo}/hooks`, {
-            owner: owner,
-            repo: repo,
-            name: 'web',
-            active: true,
-            events: [
-                'push'
-            ],
-            config: {
-                url: `https://spike-backend-yxt7.onrender.com/integrations/github/webhook`,
-                content_type: 'json',
-                insecure_ssl: '0'
-            },
-            headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
+        repos.map(async ({ owner, repo }) => {
+            console.log(`Creating /${owner}/${repo} webhook`);
+            const response = await octokit.request(`POST /repos/${owner}/${repo}/hooks`, {
+                owner: owner,
+                repo: repo,
+                name: 'web',
+                active: true,
+                events: [
+                    'push'
+                ],
+                config: {
+                    url: `https://spike-backend-yxt7.onrender.com/integrations/github/webhook`,
+                    content_type: 'json',
+                    insecure_ssl: '0'
+                },
+                headers: {
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
+            });
+            if (!(response.status >= 200 && response.status < 300)) {
+                const error = new Error(JSON.stringify(response.data) || 'Failed to create hooks for all repositories');
+                error.status = response.status;
+                throw error;
             }
-        });
-        if(!(response.status >= 200 && response.status <300)){
-            const error = new Error(JSON.stringify(response.data) || 'Failed to create hooks for all repositories');
-            error.status = response.status;
-            throw error;
-        }
-        console.log(response);
-    }));
+            console.log(response);
+        }));
     return results;
 };
 
@@ -105,7 +105,9 @@ router.get('/callback', passport.authenticate('github', { failureRedirect: '/int
         res.cookie('accessToken', accessToken,
             {
                 signed: true,
-                maxAge: 365 * 24 * 60 * 60 * 1000
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+                sameSite: 'None',
+                secure: true
             });
         console.log('Redirecting to client');
         res.redirect(`https://spike-frontend-pi.vercel.app/selectrepos`);
@@ -141,7 +143,7 @@ router.post('/user/createhooks', async (req, res) => {
     const { repos } = req.body;
     console.log(req.body);
     try {
-        const response = await createWebhooks({accessToken, repos});
+        const response = await createWebhooks({ accessToken, repos });
         console.log('Webhook for repos created.');
         res.status(200).json({
             message: 'Success'
