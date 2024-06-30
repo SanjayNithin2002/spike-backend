@@ -25,7 +25,8 @@ app.use((req, res, next) => {
         'http://localhost:3000',
         'http://localhost:3001',
         'https://spike-frontend-pi.vercel.app',
-        'postman://app'
+        'postman://app', 
+        'https://spike-backend.vercel.app'
     ];
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {
