@@ -20,24 +20,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
+// Handling CORS
 app.use((req, res, next) => {
-    const allowedOrigins = [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://spike-frontend-pi.vercel.app',
-        'postman://app', 
-        'https://spike-backend.vercel.app'
-    ];
+    const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://spike-frontend-pi.vercel.app', 'postman://app'];
     const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.header("Access-Control-Allow-Origin", origin);
+    if (allowedOrigins.includes(origin) || origin === undefined) {
+        res.header("Access-Control-Allow-Origin", origin || "*");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Accept, Authorization, Content-Type");
         res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
-        res.header("Access-Control-Allow-Credentials", "true");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+        next();
     } else {
         return res.status(403).json({ message: "Forbidden" });
     }
-    next();
 });
 
 // Routes
