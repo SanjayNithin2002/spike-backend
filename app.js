@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-// Handling CORS
+// Handling CORSs
 app.use((req, res, next) => {
     const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://spike-frontend-pi.vercel.app', 'postman://app'];
     const origin = req.headers.origin;
