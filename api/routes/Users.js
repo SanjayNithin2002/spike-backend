@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             const token = generateToken({ email: user.email, userId: user._id });
-            return res.status(200).json({ message: "Auth Successful", token });
+            return res.status(200).json({ message: "Auth Successful", token, user });
         } else {
             return res.status(401).json({ error: "Auth Failed" });
         }
