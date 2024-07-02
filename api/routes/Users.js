@@ -47,16 +47,14 @@ router.post('/login', async (req, res) => {
         if (isMatch) {
             const token = generateToken({ email: user.email, userId: user._id });
             res.cookie('token', token, {
-                signed: false,
-                maxAge: 365 * 24 * 60 * 60 * 1000,
+                maxAge: 24 * 60 * 60 * 1000,
                 sameSite: 'None'
-            });
+            })
             res.cookie('user', JSON.stringify(user), {
-                signed: false,
-                maxAge: 365 * 24 * 60 * 60 * 1000,
+                maxAge: 24 * 60 * 60 * 1000,
                 sameSite: 'None'
             });
-            return res.status(200).json({ message: "Auth Successful"});
+            res.status(200).json({ message: "Auth Successful"});
         } else {
             return res.status(401).json({ error: "Auth Failed" });
         }
