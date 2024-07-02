@@ -21,7 +21,7 @@ const createWebhooks = async ({ accessToken, repos }) => {
                 active: true,
                 events: ['push'],
                 config: {
-                    url: `https://spike-backend-yxt7.onrender.com/integrations/github/webhook`,
+                    url: `https://spike-backend.vercel.app/integrations/github/callback`,
                     content_type: 'json',
                     insecure_ssl: '0'
                 },
@@ -68,7 +68,7 @@ const getAllRepos = async (accessToken) => {
 passport.use(new GitHubStrategy({
     clientID: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: `https://spike-backend-yxt7.onrender.com/integrations/github/callback`,
+    callbackURL: `https://spike-backend.vercel.app/integrations/github/callback`,
     scope: ['repo']
 }, (accessToken, refreshToken, profile, done) => {
     return done(null, { profile, accessToken });
