@@ -47,13 +47,13 @@ router.post('/login', async (req, res) => {
         if (isMatch) {
             const token = generateToken({ email: user.email, userId: user._id });
             res.cookie('token', token, {
-                signed: true,
+                signed: false,
                 maxAge: 365 * 24 * 60 * 60 * 1000,
                 sameSite: 'None',
                 secure: true
             });
             res.cookie('user', JSON.stringify(user), {
-                signed: true,
+                signed: false,
                 maxAge: 365 * 24 * 60 * 60 * 1000,
                 sameSite: 'None',
                 secure: true
