@@ -49,14 +49,12 @@ router.post('/login', async (req, res) => {
             res.cookie('token', token, {
                 signed: false,
                 maxAge: 365 * 24 * 60 * 60 * 1000,
-                sameSite: 'None',
-                secure: true
+                sameSite: 'None'
             });
             res.cookie('user', JSON.stringify(user), {
                 signed: false,
                 maxAge: 365 * 24 * 60 * 60 * 1000,
-                sameSite: 'None',
-                secure: true
+                sameSite: 'None'
             });
             return res.status(200).json({ message: "Auth Successful"});
         } else {
