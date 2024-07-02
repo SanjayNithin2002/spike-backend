@@ -46,7 +46,19 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             const token = generateToken({ email: user.email, userId: user._id });
-            return res.status(200).json({ message: "Auth Successful", token, user });
+            res.cookie('token', token, {
+                signed: true,
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+                sameSite: 'None',
+                secure: true
+            });
+            res.cookie('user', JSON.stringify(user), {
+                signed: true,
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+                sameSite: 'None',
+                secure: true
+            });
+            return res.status(200).json({ message: "Auth Successful"});
         } else {
             return res.status(401).json({ error: "Auth Failed" });
         }
